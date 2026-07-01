@@ -13,7 +13,7 @@ fn main() -> Result<()> {
 
     let result = app.run(&mut terminal);
 
-    terminal::restore(&mut terminal);
+    terminal::restore(&mut terminal)?;
 
     result
 }

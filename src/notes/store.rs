@@ -42,21 +42,6 @@ impl NotesStore {
         Ok(folders)
     }
 
-    fn ensure_default_folders(&self) -> Result<()> {
-        let defaults = ["daily", "projects", "snippets", "archive"];
-
-        for folder in defaults {
-            let path = self.root.join(folder);
-            fs::create_dir_all(path)?;
-        }
-
-        Ok(())
-    }
-
-    pub fn note_path(&self, folder: &str, note: &str) -> PathBuf {
-        self.root.join(folder).join(note)
-    }
-
     pub fn notes_in_folder(&self, folder: &str) -> Result<Vec<String>> {
         let mut notes = Vec::new();
         let folder_path = self.root.join(folder);
@@ -83,6 +68,22 @@ impl NotesStore {
         }
 
         notes.sort();
+
         Ok(notes)
+    }
+
+    pub fn note_path(&self, folder: &str, note: &str) -> PathBuf {
+        self.root.join(folder).join(note)
+    }
+
+    fn ensure_default_folders(&self) -> Result<()> {
+        let defaults = ["daily", "projects", "snippets", "archive"];
+
+        for folder in defaults {
+            let path = self.root.join(folder);
+            fs::create_dir_all(path)?;
+        }
+
+        Ok(())
     }
 }

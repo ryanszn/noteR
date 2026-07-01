@@ -113,7 +113,7 @@ fn draw_notes(frame: &mut Frame, app: &App, area: ratatui::layout::Rect) {
 }
 
 fn draw_status_bar(frame: &mut Frame, area: ratatui::layout::Rect) {
-    let help = Paragraph::new("q quit | h/l switch panel | j/k move | ↑/↓ move")
+    let help = Paragraph::new("q quit | h/l switch panel | j/k move | enter open | n new")
         .alignment(Alignment::Center)
         .style(Style::default().fg(Color::Gray))
         .block(
