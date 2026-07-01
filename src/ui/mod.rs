@@ -116,12 +116,15 @@ fn draw_status_bar(frame: &mut Frame, app: &App, area: ratatui::layout::Rect) {
     let text = match app.mode {
         AppMode::Normal => {
             format!(
-                "q quit | h/l switch | j/k move | enter open | n new | {}",
+                "q quit | h/l switch | j/k move | enter open | n new | / search | {}",
                 app.status_message
             )
         }
         AppMode::CreatingNote => {
             format!("New note: {}", app.new_note_name)
+        }
+        AppMode::Searching => {
+            format!("Search: {}", app.search_query)
         }
     };
 
@@ -133,5 +136,6 @@ fn draw_status_bar(frame: &mut Frame, app: &App, area: ratatui::layout::Rect) {
                 .borders(Borders::ALL)
                 .border_style(Style::default().fg(Color::Yellow)),
         );
+
     frame.render_widget(help, area);
 }

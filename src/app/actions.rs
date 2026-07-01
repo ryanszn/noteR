@@ -36,15 +36,69 @@ impl App {
         if let Some(folder) = self.folders.get(self.selected_folder) {
             match self.notes_store.notes_in_folder(folder) {
                 Ok(notes) => {
+                    self.all_notes = notes.clone();
                     self.notes = notes;
                     self.selected_note = 0;
                 }
                 Err(_) => {
+                    self.all_notes.clear();
                     self.notes.clear();
                     self.selected_note = 0;
                 }
             }
         }
+    }
+
+    pub fn start_searching(&mut self) {
+        self.mode = AppMode::Searching;
+        self.search_query.clear();
+        self.status_message = "Search: type query, Enter to accept, Esc to cancel".to_string();
+    }
+
+    pub fn cancel_searching(&mut self) {
+        self.mode = AppMode::Normal;
+        self.search_query.clear();
+        self.notes = self.all_notes.clone();
+        self.selected_note = 0;
+        self.status_message = "Search cancelled".to_string();
+    }
+
+    pub fn push_search_char(&mut self, c: char) {
+        self.search_query.push(c);
+        self.apply_search_filter();
+    }
+
+    pub fn pop_search_char(&mut self) {
+        self.search_query.pop();
+        self.apply_search_filter();
+    }
+
+    pub fn accept_search(&mut self) {
+        self.mode = AppMode::Normal;
+        self.status_message = if self.search_query.is_empty() {
+            "Search cleared".to_string()
+        } else {
+            format!("Search: {}", self.search_query)
+        };
+    }
+
+    fn apply_search_filter(&mut self) {
+        let query = self.search_query.to_lowercase();
+
+        if query.is_empty() {
+            self.notes = self.all_notes.clone();
+            self.selected_note = 0;
+            return;
+        }
+
+        self.notes = self
+            .all_notes
+            .iter()
+            .filter(|note| note.to_lowercase().contains(&query))
+            .cloned()
+            .collect();
+
+        self.selected_note = 0;
     }
 
     pub fn start_creating_note(&mut self) {

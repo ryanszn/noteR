@@ -13,10 +13,12 @@ pub struct App {
     pub notes_store: NotesStore,
     pub folders: Vec<String>,
     pub notes: Vec<String>,
+    pub all_notes: Vec<String>,
     pub selected_folder: usize,
     pub selected_note: usize,
     pub active_panel: ActivePanel,
     pub mode: AppMode,
+    pub search_query: String,
     pub new_note_name: String,
     pub status_message: String,
 }
@@ -32,15 +34,19 @@ impl App {
             Vec::new()
         };
 
+        let all_notes = notes.clone();
+
         Ok(Self {
             should_quit: false,
             notes_store,
             folders,
             notes,
+            all_notes,
             selected_folder: 0,
             selected_note: 0,
             active_panel: ActivePanel::Folders,
             mode: AppMode::Normal,
+            search_query: String::new(),
             new_note_name: String::new(),
             status_message: "Ready".to_string(),
         })

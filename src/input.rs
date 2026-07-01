@@ -15,6 +15,9 @@ pub fn handle_event(app: &mut App, terminal: &mut Tui, event: Event) -> Result<(
             AppMode::CreatingNote => {
                 handle_creating_note_mode(app, key.code)?;
             }
+            AppMode::Searching => {
+                handle_search_mode(app, key.code);
+            }
         }
     }
 
@@ -44,6 +47,9 @@ fn handle_normal_mode(app: &mut App, terminal: &mut Tui, key_code: KeyCode) -> R
         KeyCode::Char('n') => {
             app.start_creating_note();
         }
+        KeyCode::Char('/') => {
+            app.start_searching();
+        }
         _ => {}
     }
 
@@ -68,4 +74,28 @@ fn handle_creating_note_mode(app: &mut App, key_code: KeyCode) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn handle_search_mode(app: &mut App, key_code: KeyCode) {
+    match key_code {
+        KeyCode::Esc => {
+            app.cancel_searching();
+        }
+        KeyCode::Enter => {
+            app.accept_search();
+        }
+        KeyCode::Backspace => {
+            app.pop_search_char();
+        }
+        KeyCode::Down => {
+            app.move_down();
+        }
+        KeyCode::Up => {
+            app.move_up();
+        }
+        KeyCode::Char(c) => {
+            app.push_search_char(c);
+        }
+        _ => {}
+    }
 }

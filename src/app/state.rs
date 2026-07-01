@@ -8,4 +8,5 @@ pub enum ActivePanel {
 pub enum AppMode {
     Normal,
     CreatingNote,
+    Searching,
 }
