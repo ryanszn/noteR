@@ -1,5 +1,6 @@
 mod app;
 mod input;
+mod notes;
 mod terminal;
 mod ui;
 
@@ -8,7 +9,7 @@ use app::App;
 
 fn main() -> Result<()> {
     let mut terminal = terminal::init()?;
-    let mut app = App::new();
+    let mut app = App::new()?;
 
     let result = app.run(&mut terminal);
 

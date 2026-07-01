@@ -1,10 +1,11 @@
 use anyhow::Result;
 use crossterm::event;
 
-use crate::{input, terminal::Tui, ui};
+use crate::{input, notes::NotesStore, terminal::Tui, ui};
 
 pub struct App {
     pub should_quit: bool,
+    pub notes_store: NotesStore,
     pub folders: Vec<String>,
     pub notes: Vec<String>,
     pub selected_folder: usize,
@@ -19,15 +20,14 @@ pub enum ActivePanel {
 }
 
 impl App {
-    pub fn new() -> Self {
-        Self {
+    pub fn new() -> Result<Self> {
+        let notes_store = NotesStore::new()?;
+        let folders = notes_store.folders()?;
+
+        Ok(Self {
             should_quit: false,
-            folders: vec![
-                "daily".to_string(),
-                "projects".to_string(),
-                "snippets".to_string(),
-                "archive".to_string(),
-            ],
+            notes_store,
+            folders,
             notes: vec![
                 "welcome.md".to_string(),
                 "app-ideas.md".to_string(),
@@ -36,7 +36,7 @@ impl App {
             selected_folder: 0,
             selected_note: 0,
             active_panel: ActivePanel::Folders,
-        }
+        })
     }
 
     pub fn run(&mut self, terminal: &mut Tui) -> Result<()> {
