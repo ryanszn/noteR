@@ -1,5 +1,10 @@
+use std::process::Command;
+
 use anyhow::Result;
-use crossterm::event;
+use crossterm::{
+    event, execute,
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
+};
 
 use crate::{input, notes::NotesStore, terminal::Tui, ui};
 
@@ -41,6 +46,30 @@ impl App {
         })
     }
 
+    pub fn open_selected_note(&mut self, terminal: &mut Tui) -> Result<()> {
+        let Some(folder) = self.folders.get(self.selected_folder) else {
+            return Ok(());
+        };
+
+        let Some(note) = self.notes.get(self.selected_note) else {
+            return Ok(());
+        };
+
+        let path = self.notes_store.note_path(folder, note);
+
+        disable_raw_mode()?;
+
+        let editor = std::env::var("EDITOR").unwrap_or_else(|_| "nvim".to_string());
+
+        Command::new(editor).arg(path).status()?;
+
+        enable_raw_mode()?;
+
+        terminal.clear()?;
+
+        Ok(())
+    }
+
     pub fn run(&mut self, terminal: &mut Tui) -> Result<()> {
         while !self.should_quit {
             terminal.draw(|frame| {
@@ -49,7 +78,7 @@ impl App {
 
             if event::poll(std::time::Duration::from_millis(100))? {
                 let event = event::read()?;
-                input::handle_event(self, event);
+                input::handle_event(self, terminal, event)?;
             }
         }
 

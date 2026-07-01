@@ -2,8 +2,12 @@ use std::io;
 
 use anyhow::Result;
 use crossterm::{
+    cursor::MoveTo,
     execute,
-    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
+    terminal::{
+        Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode,
+        enable_raw_mode,
+    },
 };
 
 use ratatui::{Terminal, backend::CrosstermBackend};
@@ -24,7 +28,15 @@ pub fn init() -> Result<Tui> {
 
 pub fn restore(terminal: &mut Tui) -> Result<()> {
     disable_raw_mode()?;
-    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+
+    terminal.clear()?;
+
+    execute!(
+        terminal.backend_mut(),
+        LeaveAlternateScreen,
+        Clear(ClearType::All),
+        MoveTo(0, 0),
+    )?;
 
     Ok(())
 }

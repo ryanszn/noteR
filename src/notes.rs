@@ -53,6 +53,10 @@ impl NotesStore {
         Ok(())
     }
 
+    pub fn note_path(&self, folder: &str, note: &str) -> PathBuf {
+        self.root.join(folder).join(note)
+    }
+
     pub fn notes_in_folder(&self, folder: &str) -> Result<Vec<String>> {
         let mut notes = Vec::new();
         let folder_path = self.root.join(folder);

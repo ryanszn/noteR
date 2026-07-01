@@ -1,8 +1,9 @@
+use anyhow::Result;
 use crossterm::event::{Event, KeyCode};
 
-use crate::app::App;
+use crate::{app::App, terminal::Tui};
 
-pub fn handle_event(app: &mut App, event: Event) {
+pub fn handle_event(app: &mut App, terminal: &mut Tui, event: Event) -> Result<()> {
     if let Event::Key(key) = event {
         match key.code {
             KeyCode::Char('q') => {
@@ -20,7 +21,12 @@ pub fn handle_event(app: &mut App, event: Event) {
             KeyCode::Char('l') | KeyCode::Right => {
                 app.focus_right();
             }
+            KeyCode::Enter => {
+                app.open_selected_note(terminal)?;
+            }
             _ => {}
         }
     }
+
+    Ok(())
 }
