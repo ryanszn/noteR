@@ -6,7 +6,7 @@ use ratatui::{
     widgets::{Block, Borders, List, ListItem, Paragraph},
 };
 
-use crate::app::{ActivePanel, App};
+use crate::app::{ActivePanel, App, AppMode};
 
 pub fn draw(frame: &mut Frame, app: &App) {
     let area = frame.area();
@@ -23,7 +23,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
 
     draw_folders(frame, app, body_chunks[0]);
     draw_notes(frame, app, body_chunks[1]);
-    draw_status_bar(frame, main_chunks[1]);
+    draw_status_bar(frame, app, main_chunks[1]);
 }
 
 fn draw_folders(frame: &mut Frame, app: &App, area: ratatui::layout::Rect) {
@@ -112,8 +112,20 @@ fn draw_notes(frame: &mut Frame, app: &App, area: ratatui::layout::Rect) {
     frame.render_widget(list, area);
 }
 
-fn draw_status_bar(frame: &mut Frame, area: ratatui::layout::Rect) {
-    let help = Paragraph::new("q quit | h/l switch panel | j/k move | enter open | n new")
+fn draw_status_bar(frame: &mut Frame, app: &App, area: ratatui::layout::Rect) {
+    let text = match app.mode {
+        AppMode::Normal => {
+            format!(
+                "q quit | h/l switch | j/k move | enter open | n new | {}",
+                app.status_message
+            )
+        }
+        AppMode::CreatingNote => {
+            format!("New note: {}", app.new_note_name)
+        }
+    };
+
+    let help = Paragraph::new(text)
         .alignment(Alignment::Center)
         .style(Style::default().fg(Color::Gray))
         .block(
@@ -121,6 +133,5 @@ fn draw_status_bar(frame: &mut Frame, area: ratatui::layout::Rect) {
                 .borders(Borders::ALL)
                 .border_style(Style::default().fg(Color::Yellow)),
         );
-
     frame.render_widget(help, area);
 }

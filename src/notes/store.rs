@@ -42,6 +42,18 @@ impl NotesStore {
         Ok(folders)
     }
 
+    pub fn create_note(&self, folder: &str, note_name: &str) -> Result<()> {
+        let path = self.root.join(folder).join(note_name);
+
+        if path.exists() {
+            return Ok(());
+        }
+
+        fs::write(path, "# New Note\n")?;
+
+        Ok(())
+    }
+
     pub fn notes_in_folder(&self, folder: &str) -> Result<Vec<String>> {
         let mut notes = Vec::new();
         let folder_path = self.root.join(folder);

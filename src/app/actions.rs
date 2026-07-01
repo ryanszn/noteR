@@ -5,7 +5,7 @@ use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
 use crate::terminal::Tui;
 
-use super::{ActivePanel, App};
+use super::{ActivePanel, App, AppMode};
 
 impl App {
     pub fn open_selected_note(&mut self, terminal: &mut Tui) -> Result<()> {
@@ -45,6 +45,58 @@ impl App {
                 }
             }
         }
+    }
+
+    pub fn start_creating_note(&mut self) {
+        self.mode = AppMode::CreatingNote;
+        self.new_note_name.clear();
+        self.status_message = "New note: type a name, Enter to create, Esc to cancel.".to_string();
+    }
+
+    pub fn cancel_creating_note(&mut self) {
+        self.mode = AppMode::Normal;
+        self.new_note_name.clear();
+        self.status_message = "Cancelled new note.".to_string();
+    }
+
+    pub fn push_new_note_char(&mut self, c: char) {
+        self.new_note_name.push(c);
+    }
+
+    pub fn pop_new_note_char(&mut self) {
+        self.new_note_name.pop();
+    }
+
+    pub fn create_note_from_input(&mut self) -> Result<()> {
+        let Some(folder) = self.folders.get(self.selected_folder) else {
+            self.status_message = "No folder selected.".to_string();
+            return Ok(());
+        };
+
+        let mut file_name = self.new_note_name.trim().to_string();
+
+        if file_name.is_empty() {
+            self.status_message = "Note name cannot be empty.".to_string();
+            return Ok(());
+        }
+
+        if !file_name.ends_with(".md") {
+            file_name.push_str(".md");
+        }
+
+        self.notes_store.create_note(folder, &file_name)?;
+        self.refresh_notes_for_selected_folder();
+
+        if let Some(index) = self.notes.iter().position(|note| note == &file_name) {
+            self.selected_note = index;
+        }
+
+        self.mode = AppMode::Normal;
+        self.new_note_name.clear();
+        self.active_panel = ActivePanel::Notes;
+        self.status_message = format!("Created {file_name}");
+
+        Ok(())
     }
 
     pub fn move_down(&mut self) {
