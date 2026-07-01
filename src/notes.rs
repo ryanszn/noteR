@@ -52,4 +52,33 @@ impl NotesStore {
 
         Ok(())
     }
+
+    pub fn notes_in_folder(&self, folder: &str) -> Result<Vec<String>> {
+        let mut notes = Vec::new();
+        let folder_path = self.root.join(folder);
+
+        if !folder_path.exists() {
+            return Ok(notes);
+        }
+
+        let entries = fs::read_dir(folder_path)?;
+
+        for entry_result in entries {
+            let entry = entry_result?;
+            let path = entry.path();
+
+            if path.is_file() {
+                if let Some(extension) = path.extension() {
+                    if extension == "md" {
+                        if let Some(name) = path.file_name() {
+                            notes.push(name.to_string_lossy().to_string());
+                        }
+                    }
+                }
+            }
+        }
+
+        notes.sort();
+        Ok(notes)
+    }
 }

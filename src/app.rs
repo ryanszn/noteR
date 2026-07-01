@@ -24,15 +24,17 @@ impl App {
         let notes_store = NotesStore::new()?;
         let folders = notes_store.folders()?;
 
+        let notes = if let Some(first_folder) = folders.first() {
+            notes_store.notes_in_folder(first_folder)?
+        } else {
+            Vec::new()
+        };
+
         Ok(Self {
             should_quit: false,
             notes_store,
             folders,
-            notes: vec![
-                "welcome.md".to_string(),
-                "app-ideas.md".to_string(),
-                "rust-learning.md".to_string(),
-            ],
+            notes,
             selected_folder: 0,
             selected_note: 0,
             active_panel: ActivePanel::Folders,
@@ -54,11 +56,27 @@ impl App {
         Ok(())
     }
 
+    fn refresh_notes_for_selected_folder(&mut self) {
+        if let Some(folder) = self.folders.get(self.selected_folder) {
+            match self.notes_store.notes_in_folder(folder) {
+                Ok(notes) => {
+                    self.notes = notes;
+                    self.selected_note = 0;
+                }
+                Err(_) => {
+                    self.notes.clear();
+                    self.selected_note = 0;
+                }
+            }
+        }
+    }
+
     pub fn move_down(&mut self) {
         match self.active_panel {
             ActivePanel::Folders => {
-                if self.selected_note + 1 < self.notes.len() {
+                if self.selected_note + 1 < self.folders.len() {
                     self.selected_folder += 1;
+                    self.refresh_notes_for_selected_folder();
                 }
             }
             ActivePanel::Notes => {
@@ -74,6 +92,7 @@ impl App {
             ActivePanel::Folders => {
                 if self.selected_folder > 0 {
                     self.selected_folder -= 1;
+                    self.refresh_notes_for_selected_folder();
                 }
             }
             ActivePanel::Notes => {
